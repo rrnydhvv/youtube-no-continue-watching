@@ -1,0 +1,16 @@
+{
+  "manifest_version": 3,
+  "name": "YouTube No Continue Watching",
+  "version": "1.0",
+  "description": "Hide continue watching popup and prevent auto pause",
+  "icons": {
+    "128": "icon128.png"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://www.youtube.com/*"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}

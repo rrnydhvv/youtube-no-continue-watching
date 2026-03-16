@@ -1,0 +1,47 @@
+(function () {
+
+function dismissPopup(){
+    const dialog = document.querySelector("yt-confirm-dialog-renderer, tp-yt-paper-dialog");
+
+    if(dialog){
+        dialog.click();
+
+        const v = document.querySelector("video");
+        if(v && v.paused){
+            v.play().catch(()=>{});
+        }
+    }
+}
+
+function onVideoChange(){
+    let tries = 0;
+
+    const t = setInterval(()=>{
+        dismissPopup();
+        tries++;
+
+        if(tries > 15) clearInterval(t);
+    },500);
+}
+
+document.addEventListener("yt-navigate-start", onVideoChange);
+
+})();
+
+
+const style = document.createElement("style");
+style.textContent = `
+yt-confirm-dialog-renderer,
+tp-yt-paper-dialog,
+tp-yt-iron-overlay-backdrop {
+    display: none !important;
+}
+`;
+document.documentElement.appendChild(style);
+
+
+setInterval(() => {
+    document.dispatchEvent(
+        new MouseEvent("mousemove", {bubbles:true})
+    );
+}, 240000);
