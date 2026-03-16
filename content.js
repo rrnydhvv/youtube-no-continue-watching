@@ -20,8 +20,8 @@ function onVideoChange(){
         dismissPopup();
         tries++;
 
-        if(tries > 15) clearInterval(t);
-    },500);
+        if(tries > 30) clearInterval(t);
+    },100);
 }
 
 document.addEventListener("yt-navigate-start", onVideoChange);
