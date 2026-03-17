@@ -1,15 +1,19 @@
 (function () {
 
 function dismissPopup(){
-    const dialog = document.querySelector("yt-confirm-dialog-renderer, tp-yt-paper-dialog");
+    const dialogs = document.querySelectorAll("yt-confirm-dialog-renderer");
 
-    if(dialog){
-        dialog.click();
+    dialogs.forEach(dialog => {
+        const confirmBtn = dialog.querySelector("#confirm-button");
 
-        const v = document.querySelector("video");
-        if(v && v.paused){
-            v.play().catch(()=>{});
+        if(confirmBtn){
+            confirmBtn.click();
         }
+    });
+
+    const v = document.querySelector("video");
+    if(v && v.paused){
+        v.play().catch(()=>{});
     }
 }
 
