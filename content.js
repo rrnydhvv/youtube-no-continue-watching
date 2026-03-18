@@ -28,7 +28,7 @@
             checkAndDismiss(t);
             tries++;
             
-            if (tries >= 60) {
+            if (tries >= 40) {
                 clearInterval(t);
             }
         }, 50);

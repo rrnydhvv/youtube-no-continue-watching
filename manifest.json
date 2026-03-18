@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "YouTube No Continue Watching",
-  "version": "2.0",
+  "version": "2.0.1",
   "description": "Hide continue watching popup and prevent auto pause",
   "icons": {
     "128": "icon128.png"
