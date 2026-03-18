@@ -1,51 +1,38 @@
 (function () {
+    function checkAndDismiss(intervalId) {
+        const dialog = document.querySelector('yt-confirm-dialog-renderer.style-scope');
+        
+        if (dialog && dialog.offsetParent !== null) {
+            const confirmBtn = dialog.querySelector('#confirm-button .yt-spec-touch-feedback-shape__fill') || dialog.querySelector('#confirm-button');
+            
+            if (confirmBtn) {
+                // 1. Ưu tiên TUYỆT ĐỐI: Bật lại video ngay lập tức không chần chừ
+                const v = document.querySelector('video');
+                if (v && v.paused) {
+                    v.play().catch(() => {}); // Bắt lỗi catch để tránh console báo đỏ nếu trình duyệt dở chứng
+                }
 
-function dismissPopup(){
-    const dialogs = document.querySelectorAll("yt-confirm-dialog-renderer");
+                // 2. Sau đó mới click tắt popup 
+                confirmBtn.click(); 
 
-    dialogs.forEach(dialog => {
-        const confirmBtn = dialog.querySelector("#confirm-button");
-
-        if(confirmBtn){
-            confirmBtn.click();
+                // 3. Dừng vòng lặp quét
+                if (intervalId) clearInterval(intervalId);
+            }
         }
-    });
-
-    const v = document.querySelector("video");
-    if(v && v.paused){
-        v.play().catch(()=>{});
     }
-}
 
-function onVideoChange(){
-    let tries = 0;
+    function onVideoChange() {
+        let tries = 0;
+        
+        const t = setInterval(() => {
+            checkAndDismiss(t);
+            tries++;
+            
+            if (tries >= 60) {
+                clearInterval(t);
+            }
+        }, 50);
+    }
 
-    const t = setInterval(()=>{
-        dismissPopup();
-        tries++;
-
-        if(tries > 30) clearInterval(t);
-    },100);
-}
-
-document.addEventListener("yt-navigate-start", onVideoChange);
-
+    document.addEventListener("yt-navigate-finish", onVideoChange);
 })();
-
-
-const style = document.createElement("style");
-style.textContent = `
-yt-confirm-dialog-renderer,
-tp-yt-paper-dialog,
-tp-yt-iron-overlay-backdrop {
-    display: none !important;
-}
-`;
-document.documentElement.appendChild(style);
-
-
-setInterval(() => {
-    document.dispatchEvent(
-        new MouseEvent("mousemove", {bubbles:true})
-    );
-}, 240000);
