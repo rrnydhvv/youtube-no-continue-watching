@@ -1,6 +1,20 @@
 (function () {
-    // Tách riêng hàm dọn rác UI để dùng lại nhiều lần
-    function cleanUI() {
+    function keepStreamAliveAndCleanUI() {
+        const v = document.querySelector('video');
+        
+        if (v && v.paused && document.hidden) {
+            // ĐIỀU KIỆN VÁ LỖI:
+            // 1. !v.ended: Video chưa kết thúc hẳn.
+            // 2. v.currentTime < v.duration - 1: Video không nằm ở 1 giây cuối cùng.
+            // (Nếu ở 1s cuối, khả năng cao là đang chuyển bài -> KHÔNG can thiệp)
+            const isNearEnd = v.currentTime > v.duration - 1;
+
+            if (!v.ended && !isNearEnd) {
+                v.play().catch(() => {});
+            }
+        }
+
+        // Tác vụ dọn dẹp UI vẫn giữ nguyên
         const dialog = document.querySelector('yt-confirm-dialog-renderer');
         if (dialog && dialog.offsetParent !== null) {
             const confirmBtn = dialog.querySelector('#confirm-button .yt-spec-touch-feedback-shape__fill') || dialog.querySelector('#confirm-button');
@@ -10,38 +24,25 @@
         }
     }
 
-    // Hàm giữ luồng nhạc
-    function keepStreamAlive() {
-        const v = document.querySelector('video');
-        if (v && v.paused && !v.ended && document.hidden) {
-            v.play().catch(() => {});
-        }
-        cleanUI();
-    }
-
-    // 1. Lắng nghe khi video bị ép dừng
     document.addEventListener('pause', function(event) {
         if (event.target && event.target.tagName === 'VIDEO') {
-            setTimeout(keepStreamAlive, 100);
-            setTimeout(keepStreamAlive, 500);
-            setTimeout(keepStreamAlive, 1500);
+            // Tăng độ trễ lên 200ms để nhường sân cho trình phát của YT xử lý chuyển bài
+            setTimeout(keepStreamAliveAndCleanUI, 200);
+            setTimeout(keepStreamAliveAndCleanUI, 1000);
         }
     }, true);
     
-    // 2. Lắng nghe khi chuyển video mới
     document.addEventListener("yt-navigate-finish", () => {
-        setTimeout(keepStreamAlive, 1000);
-        setTimeout(keepStreamAlive, 2000);
+        setTimeout(keepStreamAliveAndCleanUI, 1000);
     });
 
-    // 3. CHIÊU CUỐI: Lắng nghe khi bạn vừa quay trở lại tab YouTube
     document.addEventListener("visibilitychange", () => {
         if (!document.hidden) {
-            // Khi tab hiển thị lại, quét dọn ngay lập tức
-            cleanUI();
-            // Quét dự phòng thêm 2 lần phòng trường hợp YouTube vẽ giao diện chậm mất vài mili-giây
-            setTimeout(cleanUI, 300);
-            setTimeout(cleanUI, 800);
+            const dialog = document.querySelector('yt-confirm-dialog-renderer');
+            if (dialog) {
+                const confirmBtn = dialog.querySelector('#confirm-button');
+                if (confirmBtn) confirmBtn.click();
+            }
         }
     });
 })();
